@@ -1,13 +1,13 @@
-package in.gov.jansaarthi.eligibility;
+package in.gov.jansaarthi.policyservice;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
-public class EligibilityServiceApplication {
+public class PolicyServiceApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(EligibilityServiceApplication.class, args);
+        SpringApplication.run(PolicyServiceApplication.class, args);
     }
 
 }

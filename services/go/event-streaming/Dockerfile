@@ -1,7 +1,7 @@
 FROM golang:1.21 AS build
 WORKDIR /app
 COPY go.mod .
-COPY main.go .
+COPY *.go .
 RUN go build -o service .
 
 FROM gcr.io/distroless/base-debian12
