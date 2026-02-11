@@ -54,6 +54,10 @@ def require_role(auth: str | None):
     if REQUIRED_ROLE not in roles:
         raise HTTPException(status_code=403, detail="forbidden")
 
+@app.get("/health")
+async def health():
+    return {"status": "healthy", "service": "asr-service"}
+
 @app.post("/api/v1/asr/transcribe", response_model=ASRResponse)
 async def transcribe(req: ASRRequest, authorization: str | None = Header(default=None)):
     require_role(authorization)

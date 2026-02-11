@@ -55,6 +55,10 @@ def require_role(auth: str | None):
     if REQUIRED_ROLE not in roles:
         raise HTTPException(status_code=403, detail="forbidden")
 
+@app.get("/health")
+async def health():
+    return {"status": "healthy", "service": "vector-search-service"}
+
 @app.post("/api/v1/vector/search", response_model=List[VectorResult])
 async def search(req: VectorQuery, authorization: str | None = Header(default=None)):
     require_role(authorization)
