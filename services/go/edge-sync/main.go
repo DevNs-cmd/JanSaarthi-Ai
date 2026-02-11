@@ -9,7 +9,6 @@ import (
   "net/http"
   "os"
   "strings"
-  "time"
 
   "github.com/MicahParks/keyfunc"
   "github.com/golang-jwt/jwt/v5"
