@@ -1,0 +1,25 @@
+syntax = "proto3";
+package jansaarthi.eligibility.v1;
+
+message EligibilityRequest {
+  string citizen_id = 1;
+  string policy_id = 2;
+  string policy_version = 3;
+  string input_snapshot_version = 4;
+  string location = 5;
+  string channel = 6;
+}
+
+message Explanation {
+  string rule_id = 1;
+  string message = 2;
+  repeated string inputs_used = 3;
+  string policy_version = 4;
+}
+
+message EligibilityResponse {
+  bool eligible = 1;
+  string decision_code = 2;
+  repeated Explanation explanations = 3;
+  string audit_ref = 4;
+}

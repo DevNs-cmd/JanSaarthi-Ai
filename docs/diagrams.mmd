@@ -1,0 +1,77 @@
+%% JanSaarthi AI - Architecture Diagrams
+
+flowchart LR
+  subgraph Citizen_Interfaces[Citizen Interfaces]
+    A1[Flutter App]\nOffline First
+    A2[Kiosk Mode]\nAndroid
+    A3[WhatsApp Gateway]
+    A4[IVR Voice Access]
+  end
+
+  subgraph Edge_Plane[Edge Plane - District/Block]
+    E1[K3s Cluster]
+    E2[Local Eligibility Engine]\nDrools/OPA
+    E3[Local Store]\nSQLite/RocksDB
+    E4[Offline ASR/TTS]\nONNX Quantized
+  end
+
+  subgraph Core_Services[Core Services - State/National]
+    C1[Citizen Profile Service]\nSpring Boot
+    C2[Consent and Identity]\nYojana ID
+    C3[Policy Service]\nVersioned Rules
+    C4[Eligibility Service]\nExplainable Output
+    C5[Workflow Orchestrator]\nGo
+    C6[Event Streaming]\nKafka
+  end
+
+  subgraph Knowledge_Intel[Knowledge and Intelligence]
+    K1[Knowledge Graph]\nNeo4j
+    K2[Vector Search]\nFAISS
+    K3[Predictive Analytics]\nPython
+    K4[Governance Dashboards]\nNext.js
+  end
+
+  A1 --> E1
+  A2 --> E1
+  A3 --> C6
+  A4 --> E4
+
+  E1 --> E2
+  E2 --> E3
+  E1 --> C6
+
+  C6 --> C1
+  C6 --> C2
+  C6 --> C3
+  C6 --> C4
+  C6 --> C5
+
+  C1 --> K1
+  C3 --> K1
+  C4 --> K1
+  K1 --> K4
+  K2 --> K4
+  K3 --> K4
+
+  C6 --> K3
+
+---
+
+sequenceDiagram
+  autonumber
+  participant Citizen
+  participant App as Mobile/Kiosk App
+  participant Edge as Edge Cluster
+  participant Policy as Policy Service
+  participant Elig as Eligibility Service
+  participant Kafka as Kafka Backbone
+  participant Gov as Governance Dashboard
+
+  Citizen->>App: Submit profile and intent
+  App->>Edge: Offline sync and eligibility request
+  Edge->>Policy: Use cached policy bundle
+  Edge->>Elig: Execute deterministic rules
+  Elig-->>Edge: Eligibility decision + explanation
+  Edge-->>App: Show decision in citizen language
+  Edge->>Kafka: Publish event when online
+  Kafka->>Gov: Update aggregated insights

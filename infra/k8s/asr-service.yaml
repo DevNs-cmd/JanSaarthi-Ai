@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: asr-service
+  namespace: jansaarthi
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: asr-service
+  template:
+    metadata:
+      labels:
+        app: asr-service
+    spec:
+      containers:
+        - name: asr-service
+          image: jansaarthi/asr-service:0.1.0
+          ports:
+            - containerPort: 8000
+          env:
+            - name: JWT_SECRET
+              value: CHANGE_ME_32_CHAR_MIN_SECRET
+            - name: JWT_ISSUER
+              value: jan-saarthi
+            - name: JWT_AUDIENCE
+              value: jan-saarthi-services
+            - name: OIDC_JWKS_URL
+              value: http://keycloak:8080/realms/jan-saarthi/protocol/openid-connect/certs
+            - name: AUTH_MODE
+              value: hs256
+            - name: VAULT_ADDR
+              value: http://vault:8200
+            - name: VAULT_TOKEN
+              value: root
+            - name: VAULT_SECRET_PATH
+              value: secret/data/jansaarthi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: asr-service
+  namespace: jansaarthi
+spec:
+  selector:
+    app: asr-service
+  ports:
+    - port: 8000
+      targetPort: 8000

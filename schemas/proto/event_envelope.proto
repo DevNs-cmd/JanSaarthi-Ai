@@ -1,0 +1,14 @@
+syntax = "proto3";
+package jansaarthi.event.v1;
+
+message EventEnvelope {
+  string event_id = 1;
+  string event_type = 2;
+  string event_version = 3;
+  string occurred_at = 4;
+  string producer = 5;
+  string trace_id = 6;
+  string policy_version = 7;
+  string consent_token = 8;
+  bytes payload = 9;
+}

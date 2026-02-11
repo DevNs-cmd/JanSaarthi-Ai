@@ -1,0 +1,15 @@
+package rules
+
+import in.gov.jansaarthi.eligibility.rules.CitizenFacts;
+import in.gov.jansaarthi.eligibility.rules.DecisionCollector;
+
+global DecisionCollector collector;
+
+rule "Base Eligibility"
+when
+  $c : CitizenFacts( farmer == "yes", landHolding == "small" )
+then
+  collector.eligible = true;
+  collector.ruleId = "RULE-BASE-001";
+  collector.message = "Eligibility criteria satisfied";
+end

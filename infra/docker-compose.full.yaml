@@ -1,0 +1,245 @@
+version: '3.9'
+services:
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.6.1
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:7.6.1
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+    ports:
+      - "9092:9092"
+
+  schema-registry:
+    image: confluentinc/cp-schema-registry:7.6.1
+    depends_on:
+      - kafka
+    environment:
+      SCHEMA_REGISTRY_HOST_NAME: schema-registry
+      SCHEMA_REGISTRY_KAFKASTORE_BOOTSTRAP_SERVERS: PLAINTEXT://kafka:9092
+    ports:
+      - "8088:8081"
+
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: jansaarthi
+      POSTGRES_PASSWORD: jansaarthi
+      POSTGRES_DB: jansaarthi
+    ports:
+      - "5432:5432"
+
+  neo4j:
+    image: neo4j:5
+    environment:
+      NEO4J_AUTH: neo4j/test1234
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+
+  minio:
+    image: minio/minio:RELEASE.2024-12-18T09-00-20Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0.2
+    command: start-dev --import-realm
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    volumes:
+      - ./infra/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+    ports:
+      - "8080:8080"
+
+  vault:
+    image: hashicorp/vault:1.16
+    command: server -config=/vault/config/vault.hcl
+    cap_add:
+      - IPC_LOCK
+    volumes:
+      - ./infra/vault/vault.hcl:/vault/config/vault.hcl:ro
+    environment:
+      VAULT_DEV_ROOT_TOKEN_ID: root
+    ports:
+      - "8200:8200"
+
+  citizen-profile:
+    build: ./services/java/citizen-profile
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jansaarthi
+      SPRING_DATASOURCE_USERNAME: jansaarthi
+      SPRING_DATASOURCE_PASSWORD: jansaarthi
+      SECURITY_JWT_SECRET: CHANGE_ME_32_CHAR_MIN_SECRET
+      SECURITY_JWT_ISSUER: jan-saarthi
+      SECURITY_JWT_AUDIENCE: jan-saarthi-services
+      SECURITY_JWT_MODE: hs256
+      SECURITY_JWT_ISSUER_URI: http://keycloak:8080/realms/jan-saarthi
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+      VAULT_SECRET_PATH: secret/data/jansaarthi
+    ports:
+      - "8081:8081"
+
+  consent-identity:
+    build: ./services/java/consent-identity
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jansaarthi
+      SPRING_DATASOURCE_USERNAME: jansaarthi
+      SPRING_DATASOURCE_PASSWORD: jansaarthi
+      SECURITY_JWT_SECRET: CHANGE_ME_32_CHAR_MIN_SECRET
+      SECURITY_JWT_ISSUER: jan-saarthi
+      SECURITY_JWT_AUDIENCE: jan-saarthi-services
+      SECURITY_JWT_MODE: hs256
+      SECURITY_JWT_ISSUER_URI: http://keycloak:8080/realms/jan-saarthi
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+      VAULT_SECRET_PATH: secret/data/jansaarthi
+    ports:
+      - "8082:8082"
+
+  policy-service:
+    build: ./services/java/policy-service
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jansaarthi
+      SPRING_DATASOURCE_USERNAME: jansaarthi
+      SPRING_DATASOURCE_PASSWORD: jansaarthi
+      SECURITY_JWT_SECRET: CHANGE_ME_32_CHAR_MIN_SECRET
+      SECURITY_JWT_ISSUER: jan-saarthi
+      SECURITY_JWT_AUDIENCE: jan-saarthi-services
+      SECURITY_JWT_MODE: hs256
+      SECURITY_JWT_ISSUER_URI: http://keycloak:8080/realms/jan-saarthi
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+      VAULT_SECRET_PATH: secret/data/jansaarthi
+    ports:
+      - "8083:8083"
+
+  event-streaming:
+    build: ./services/go/event-streaming
+    depends_on:
+      - kafka
+    environment:
+      KAFKA_BROKER: kafka:9092
+      KAFKA_TOPIC: jsai.events.v1
+      JWT_SECRET: CHANGE_ME_32_CHAR_MIN_SECRET
+      JWT_ISSUER: jan-saarthi
+      JWT_AUDIENCE: jan-saarthi-services
+      OIDC_JWKS_URL: http://keycloak:8080/realms/jan-saarthi/protocol/openid-connect/certs
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+      VAULT_SECRET_PATH: secret/data/jansaarthi
+    ports:
+      - "8091:8091"
+
+  eligibility-service:
+    build: ./services/java/eligibility-service
+    depends_on:
+      - postgres
+      - event-streaming
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jansaarthi
+      SPRING_DATASOURCE_USERNAME: jansaarthi
+      SPRING_DATASOURCE_PASSWORD: jansaarthi
+      SECURITY_JWT_SECRET: CHANGE_ME_32_CHAR_MIN_SECRET
+      EVENT_STREAMING_ENDPOINT: http://event-streaming:8091/api/v1/events
+      SECURITY_JWT_ISSUER: jan-saarthi
+      SECURITY_JWT_AUDIENCE: jan-saarthi-services
+      SECURITY_JWT_MODE: hs256
+      SECURITY_JWT_ISSUER_URI: http://keycloak:8080/realms/jan-saarthi
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+      VAULT_SECRET_PATH: secret/data/jansaarthi
+    ports:
+      - "8084:8084"
+
+  edge-sync:
+    build: ./services/go/edge-sync
+    environment:
+      JWT_SECRET: CHANGE_ME_32_CHAR_MIN_SECRET
+      JWT_ISSUER: jan-saarthi
+      JWT_AUDIENCE: jan-saarthi-services
+      OIDC_JWKS_URL: http://keycloak:8080/realms/jan-saarthi/protocol/openid-connect/certs
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+      VAULT_SECRET_PATH: secret/data/jansaarthi
+    ports:
+      - "8092:8092"
+
+  workflow-orchestrator:
+    build: ./services/go/workflow-orchestrator
+    environment:
+      JWT_SECRET: CHANGE_ME_32_CHAR_MIN_SECRET
+      JWT_ISSUER: jan-saarthi
+      JWT_AUDIENCE: jan-saarthi-services
+      OIDC_JWKS_URL: http://keycloak:8080/realms/jan-saarthi/protocol/openid-connect/certs
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+      VAULT_SECRET_PATH: secret/data/jansaarthi
+    ports:
+      - "8093:8093"
+
+  asr-service:
+    build: ./services/python/asr-service
+    environment:
+      JWT_SECRET: CHANGE_ME_32_CHAR_MIN_SECRET
+      JWT_ISSUER: jan-saarthi
+      JWT_AUDIENCE: jan-saarthi-services
+      OIDC_JWKS_URL: http://keycloak:8080/realms/jan-saarthi/protocol/openid-connect/certs
+      AUTH_MODE: hs256
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+      VAULT_SECRET_PATH: secret/data/jansaarthi
+    ports:
+      - "8000:8000"
+
+  analytics-service:
+    build: ./services/python/analytics-service
+    environment:
+      JWT_SECRET: CHANGE_ME_32_CHAR_MIN_SECRET
+      JWT_ISSUER: jan-saarthi
+      JWT_AUDIENCE: jan-saarthi-services
+      OIDC_JWKS_URL: http://keycloak:8080/realms/jan-saarthi/protocol/openid-connect/certs
+      AUTH_MODE: hs256
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+      VAULT_SECRET_PATH: secret/data/jansaarthi
+    ports:
+      - "8001:8001"
+
+  vector-search:
+    build: ./services/python/vector-search-service
+    environment:
+      JWT_SECRET: CHANGE_ME_32_CHAR_MIN_SECRET
+      JWT_ISSUER: jan-saarthi
+      JWT_AUDIENCE: jan-saarthi-services
+      OIDC_JWKS_URL: http://keycloak:8080/realms/jan-saarthi/protocol/openid-connect/certs
+      AUTH_MODE: hs256
+      VAULT_ADDR: http://vault:8200
+      VAULT_TOKEN: root
+      VAULT_SECRET_PATH: secret/data/jansaarthi
+    ports:
+      - "8002:8002"

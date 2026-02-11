@@ -1,0 +1,5 @@
+edgeId: EDGE-DEFAULT
+syncEndpoint: http://edge-sync:8092/api/v1/edge/sync
+policyBundleCache: /var/jansaarthi/policies
+localStore: /var/jansaarthi/store.db
+offlineWindowDays: 30

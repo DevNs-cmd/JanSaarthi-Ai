@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eligibility-service
+  namespace: jansaarthi
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: eligibility-service
+  template:
+    metadata:
+      labels:
+        app: eligibility-service
+    spec:
+      containers:
+        - name: eligibility-service
+          image: jansaarthi/eligibility-service:0.1.0
+          ports:
+            - containerPort: 8084
+          env:
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres:5432/jansaarthi
+            - name: SPRING_DATASOURCE_USERNAME
+              value: jansaarthi
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: jansaarthi
+            - name: SECURITY_JWT_SECRET
+              value: CHANGE_ME_32_CHAR_MIN_SECRET
+            - name: EVENT_STREAMING_ENDPOINT
+              value: http://event-streaming:8091/api/v1/events
+            - name: SECURITY_JWT_ISSUER
+              value: jan-saarthi
+            - name: SECURITY_JWT_AUDIENCE
+              value: jan-saarthi-services
+            - name: SECURITY_JWT_MODE
+              value: hs256
+            - name: SECURITY_JWT_ISSUER_URI
+              value: http://keycloak:8080/realms/jan-saarthi
+            - name: VAULT_ADDR
+              value: http://vault:8200
+            - name: VAULT_TOKEN
+              value: root
+            - name: VAULT_SECRET_PATH
+              value: secret/data/jansaarthi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: eligibility-service
+  namespace: jansaarthi
+spec:
+  selector:
+    app: eligibility-service
+  ports:
+    - port: 8084
+      targetPort: 8084

@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: event-streaming
+  namespace: jansaarthi
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: event-streaming
+  template:
+    metadata:
+      labels:
+        app: event-streaming
+    spec:
+      containers:
+        - name: event-streaming
+          image: jansaarthi/event-streaming:0.1.0
+          ports:
+            - containerPort: 8091
+          env:
+            - name: KAFKA_BROKER
+              value: kafka:9092
+            - name: KAFKA_TOPIC
+              value: jsai.events.v1
+            - name: JWT_SECRET
+              value: CHANGE_ME_32_CHAR_MIN_SECRET
+            - name: JWT_ISSUER
+              value: jan-saarthi
+            - name: JWT_AUDIENCE
+              value: jan-saarthi-services
+            - name: OIDC_JWKS_URL
+              value: http://keycloak:8080/realms/jan-saarthi/protocol/openid-connect/certs
+            - name: VAULT_ADDR
+              value: http://vault:8200
+            - name: VAULT_TOKEN
+              value: root
+            - name: VAULT_SECRET_PATH
+              value: secret/data/jansaarthi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: event-streaming
+  namespace: jansaarthi
+spec:
+  selector:
+    app: event-streaming
+  ports:
+    - port: 8091
+      targetPort: 8091

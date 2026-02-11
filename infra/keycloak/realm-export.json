@@ -1,0 +1,45 @@
+{
+  "realm": "jan-saarthi",
+  "enabled": true,
+  "clients": [
+    {
+      "clientId": "jan-saarthi-services",
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "CHANGE_ME_CLIENT_SECRET",
+      "standardFlowEnabled": true,
+      "serviceAccountsEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": ["*"]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {"name":"PROFILE_WRITE"},
+      {"name":"PROFILE_READ"},
+      {"name":"CONSENT_WRITE"},
+      {"name":"CONSENT_READ"},
+      {"name":"POLICY_WRITE"},
+      {"name":"POLICY_READ"},
+      {"name":"ELIGIBILITY_EXECUTE"},
+      {"name":"EVENT_WRITE"},
+      {"name":"EDGE_SYNC"},
+      {"name":"WORKFLOW_WRITE"},
+      {"name":"ASR_EXECUTE"},
+      {"name":"ANALYTICS_READ"},
+      {"name":"VECTOR_SEARCH"}
+    ]
+  },
+  "users": [
+    {
+      "username": "ci-user",
+      "enabled": true,
+      "credentials": [{"type":"password","value":"changeMeNow","temporary": false}],
+      "realmRoles": [
+        "PROFILE_WRITE","PROFILE_READ","CONSENT_WRITE","CONSENT_READ",
+        "POLICY_WRITE","POLICY_READ","ELIGIBILITY_EXECUTE","EVENT_WRITE",
+        "EDGE_SYNC","WORKFLOW_WRITE","ASR_EXECUTE","ANALYTICS_READ","VECTOR_SEARCH"
+      ]
+    }
+  ]
+}
