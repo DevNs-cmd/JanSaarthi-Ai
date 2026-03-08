@@ -3,11 +3,38 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../services/providers.dart';
 import '../models/api_models.dart';
 
-class ProfileScreen extends ConsumerWidget {
+class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends ConsumerState<ProfileScreen> {
+  int _selectedIndex = 3;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    switch (index) {
+      case 0:
+        Navigator.popUntil(context, (route) => route.isFirst);
+        break;
+      case 1:
+        Navigator.pushNamed(context, '/eligibility');
+        break;
+      case 2:
+        Navigator.pushNamed(context, '/alerts');
+        break;
+      case 3:
+        // Already on profile
+        break;
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final profileState = ref.watch(
       citizenProfileProvider('CID-123'),
     ); // Mock citizen ID
@@ -180,7 +207,13 @@ class ProfileScreen extends ConsumerWidget {
                 Expanded(
                   child: ElevatedButton(
                     onPressed: () {
-                      // Update profile functionality
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Profile update functionality coming soon!',
+                          ),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFF6B5CE7),
@@ -194,7 +227,13 @@ class ProfileScreen extends ConsumerWidget {
                 Expanded(
                   child: OutlinedButton(
                     onPressed: () {
-                      // Upload documents functionality
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text(
+                            'Document upload functionality coming soon!',
+                          ),
+                        ),
+                      );
                     },
                     style: OutlinedButton.styleFrom(
                       side: const BorderSide(color: Color(0xFF6B5CE7)),
@@ -215,7 +254,8 @@ class ProfileScreen extends ConsumerWidget {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: const Color(0xFF6B5CE7),
         unselectedItemColor: Colors.grey,
-        currentIndex: 3,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(

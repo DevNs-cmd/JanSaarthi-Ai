@@ -72,40 +72,88 @@ class EligibilityScreen extends ConsumerWidget {
                       'PM Kisan Samman Nidhi',
                       'Direct income support of ₹6,000 per year in three equal installments for all landholding farmer families.',
                       true,
-                      () {},
-                      () {},
+                      () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Application submitted for PM Kisan!',
+                            ),
+                          ),
+                        );
+                      },
+                      () {
+                        Navigator.pushNamed(context, '/profile');
+                      },
                     ),
                     const SizedBox(height: 16),
                     _buildSchemeCard(
                       'Ayushman Bharat Yojana',
                       'Health cover of ₹5 lakhs per family per year for secondary and tertiary care hospitalization.',
                       true,
-                      () {},
-                      () {},
+                      () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Application submitted for Ayushman Bharat!',
+                            ),
+                          ),
+                        );
+                      },
+                      () {
+                        Navigator.pushNamed(context, '/profile');
+                      },
                     ),
                     const SizedBox(height: 16),
                     _buildSchemeCard(
                       'PM Svanidhi',
                       'Special Micro-credit facility for street vendors to provide affordable working capital loans.',
                       false,
-                      () {},
-                      () {},
+                      () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Application submitted for PM Svanidhi!',
+                            ),
+                          ),
+                        );
+                      },
+                      () {
+                        Navigator.pushNamed(context, '/profile');
+                      },
                     ),
                     const SizedBox(height: 16),
                     _buildSchemeCard(
                       'Pradhan Mantri Awas Yojana',
                       'Housing for All by 2022 - urban housing scheme for economically weaker sections.',
                       true,
-                      () {},
-                      () {},
+                      () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Application submitted for PMAY!'),
+                          ),
+                        );
+                      },
+                      () {
+                        Navigator.pushNamed(context, '/profile');
+                      },
                     ),
                     const SizedBox(height: 16),
                     _buildSchemeCard(
                       'National Scholarship Portal',
                       'Centralized scholarship portal for students from class 1 to Ph.D level.',
                       false,
-                      () {},
-                      () {},
+                      () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Application submitted for Scholarship!',
+                            ),
+                          ),
+                        );
+                      },
+                      () {
+                        Navigator.pushNamed(context, '/profile');
+                      },
                     ),
                   ],
                 ),
@@ -141,7 +189,7 @@ class EligibilityScreen extends ConsumerWidget {
                     ),
                     ElevatedButton(
                       onPressed: () {
-                        // Navigate to profile update
+                        Navigator.pushNamed(context, '/profile');
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF6B5CE7),

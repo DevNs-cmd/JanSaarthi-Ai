@@ -140,7 +140,13 @@ class AdminDashboardScreen extends ConsumerWidget {
                             const SizedBox(height: 16),
                             ElevatedButton(
                               onPressed: () {
-                                // View detailed map
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text(
+                                      'Opening detailed map view...',
+                                    ),
+                                  ),
+                                );
                               },
                               child: const Text('View Detail'),
                             ),
@@ -233,24 +239,28 @@ class AdminDashboardScreen extends ConsumerWidget {
                         children: [
                           _buildTableHeader(),
                           _buildTableRow(
+                            context,
                             'Patna, BR',
                             'Health',
                             'CRITICAL',
                             true,
                           ),
                           _buildTableRow(
+                            context,
                             'Lucknow, UP',
                             'Education',
                             'PENDING',
                             false,
                           ),
                           _buildTableRow(
+                            context,
                             'Bangalore, KA',
                             'Employment',
                             'CRITICAL',
                             true,
                           ),
                           _buildTableRow(
+                            context,
                             'Chennai, TN',
                             'Agriculture',
                             'PENDING',
@@ -367,6 +377,7 @@ class AdminDashboardScreen extends ConsumerWidget {
   }
 
   Widget _buildTableRow(
+    BuildContext context,
     String region,
     String department,
     String status,
@@ -408,7 +419,13 @@ class AdminDashboardScreen extends ConsumerWidget {
           Expanded(
             child: ElevatedButton(
               onPressed: () {
-                // Handle action
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(
+                      'Processing action for $region - $department...',
+                    ),
+                  ),
+                );
               },
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color(0xFF6B5CE7),

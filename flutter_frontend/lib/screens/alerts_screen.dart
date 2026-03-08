@@ -129,7 +129,11 @@ class AlertsScreen extends ConsumerWidget {
                   Center(
                     child: TextButton(
                       onPressed: () {
-                        // Load more notifications
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text('Loading older updates...'),
+                          ),
+                        );
                       },
                       child: const Text(
                         'View older updates',

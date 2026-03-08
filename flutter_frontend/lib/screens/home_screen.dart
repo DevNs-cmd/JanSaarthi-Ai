@@ -1,7 +1,34 @@
 import 'package:flutter/material.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  int _selectedIndex = 0;
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+    switch (index) {
+      case 0:
+        // Already on home
+        break;
+      case 1:
+        Navigator.pushNamed(context, '/eligibility');
+        break;
+      case 2:
+        Navigator.pushNamed(context, '/alerts');
+        break;
+      case 3:
+        Navigator.pushNamed(context, '/profile');
+        break;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -48,24 +75,28 @@ class HomeScreen extends StatelessWidget {
                   'Check Benefits',
                   Icons.document_scanner,
                   'कैसे बेनिफिट्स लें?',
+                  '/eligibility',
                 ),
                 _buildServiceCard(
                   context,
                   'Jobs & Skills',
                   Icons.work,
                   'जॉब्स और कौशल',
+                  '/eligibility',
                 ),
                 _buildServiceCard(
                   context,
                   'Health & Edu',
                   Icons.school,
                   'स्वास्थ्य और शिक्षा',
+                  '/eligibility',
                 ),
                 _buildServiceCard(
                   context,
                   'Agriculture',
                   Icons.agriculture,
                   'कृषि और खेती',
+                  '/eligibility',
                 ),
               ],
             ),
@@ -85,11 +116,11 @@ class HomeScreen extends StatelessWidget {
 
             Row(
               children: [
-                _buildGovCard('Auditor Card'),
+                _buildGovCard(context, 'Auditor Card', 0),
                 const SizedBox(width: 12),
-                _buildGovCard('Ration Card'),
+                _buildGovCard(context, 'Ration Card', 1),
                 const SizedBox(width: 12),
-                _buildGovCard('PM Kisan'),
+                _buildGovCard(context, 'PM Kisan', 2),
               ],
             ),
 
@@ -131,6 +162,8 @@ class HomeScreen extends StatelessWidget {
         type: BottomNavigationBarType.fixed,
         selectedItemColor: const Color(0xFF6B5CE7),
         unselectedItemColor: Colors.grey,
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(
@@ -152,62 +185,80 @@ class HomeScreen extends StatelessWidget {
     String title,
     IconData icon,
     String subtitle,
+    String route,
   ) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(icon, size: 40, color: const Color(0xFF6B5CE7)),
-          const SizedBox(height: 12),
-          Text(
-            title,
-            style: const TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF333333),
+    return GestureDetector(
+      onTap: () {
+        Navigator.pushNamed(context, route);
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 8,
+              offset: const Offset(0, 2),
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            subtitle,
-            style: const TextStyle(fontSize: 12, color: Colors.grey),
-            textAlign: TextAlign.center,
-          ),
-        ],
+          ],
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(icon, size: 40, color: const Color(0xFF6B5CE7)),
+            const SizedBox(height: 12),
+            Text(
+              title,
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF333333),
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              style: const TextStyle(fontSize: 12, color: Colors.grey),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildGovCard(String title) {
+  Widget _buildGovCard(BuildContext context, String title, int index) {
     return Expanded(
-      child: Container(
-        height: 80,
-        decoration: BoxDecoration(
-          color: const Color(0xFF6B5CE7),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Center(
-          child: Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-              fontSize: 12,
+      child: GestureDetector(
+        onTap: () {
+          // Navigate based on card index
+          if (title == 'Auditor Card') {
+            Navigator.pushNamed(context, '/auditor');
+          } else if (title == 'Ration Card') {
+            Navigator.pushNamed(context, '/profile');
+          } else if (title == 'PM Kisan') {
+            Navigator.pushNamed(context, '/eligibility');
+          }
+        },
+        child: Container(
+          height: 80,
+          decoration: BoxDecoration(
+            color: const Color(0xFF6B5CE7),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+              ),
+              textAlign: TextAlign.center,
             ),
-            textAlign: TextAlign.center,
           ),
         ),
       ),
